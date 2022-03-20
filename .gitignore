@@ -1,0 +1,9 @@
+### THEOS-Tweak ###
+._*
+*.deb
+.debmake
+_
+obj
+packages
+.theos
+.DS_Store
