@@ -94,7 +94,7 @@ NSString *modifiedTimeString;
         }
     }
     if([overlayView isKindOfClass:%c(YTMainAppVideoPlayerOverlayView)]){
-        YTInlinePlayerBarView *playerBarView = self.view.overlayView.playerBar.playerBar ?: self.view.overlayView.playerBar.segmentablePlayerBar;
+        YTInlinePlayerBarView *playerBarView = self.view.overlayView.playerBar.segmentablePlayerBar;
         
         [playerBarView maybeCreateMarkerViewsISB];
         
@@ -156,7 +156,7 @@ NSString *modifiedTimeString;
     if(!self.isPlayingAd) {
         id overlayView = self.view.overlayView;
         if([overlayView isKindOfClass:%c(YTMainAppVideoPlayerOverlayView)]){
-            YTInlinePlayerBarView *playerBarView = self.view.overlayView.playerBar.playerBar ?: self.view.overlayView.playerBar.segmentablePlayerBar;
+            YTInlinePlayerBarView *playerBarView = self.view.overlayView.playerBar.segmentablePlayerBar;
             [playerBarView maybeCreateMarkerViewsISB];
         }
     }
@@ -197,14 +197,14 @@ NSString *modifiedTimeString;
 -(void)setPlayerViewLayout:(NSInteger)arg1 {
     %orig;
     if([self.view.overlayView isKindOfClass:%c(YTMainAppVideoPlayerOverlayView)]){
-        YTInlinePlayerBarView *playerBarView = self.view.overlayView.playerBar.playerBar ?: self.view.overlayView.playerBar.segmentablePlayerBar;
+        YTInlinePlayerBarView *playerBarView = self.view.overlayView.playerBar.segmentablePlayerBar;
         [playerBarView maybeCreateMarkerViewsISB];
     }
 }
 -(void)updateViewportSizeProvider {
     %orig;
     if([self.view.overlayView isKindOfClass:%c(YTMainAppVideoPlayerOverlayView)]) {
-        YTInlinePlayerBarView *playerBarView = self.view.overlayView.playerBar.playerBar ?: self.view.overlayView.playerBar.segmentablePlayerBar;
+        YTInlinePlayerBarView *playerBarView = self.view.overlayView.playerBar.segmentablePlayerBar;
         [playerBarView maybeCreateMarkerViewsISB];
     }
 }
@@ -447,6 +447,10 @@ NSString *modifiedTimeString;
         self.durationLabel.text = text;
         [self.durationLabel sizeToFit];
     }
+}
+%new
+-(id)playerBar {
+    return [self segmentablePlayerBar];
 }
 %end
 
@@ -703,6 +707,7 @@ AVQueuePlayer *queuePlayer;
 %end
 
 %group JustSettings
+YTQTMButton *sponsorBlockButton;
 NSInteger pageStyle = 0;
 %hook YTRightNavigationButtons
 %property (strong, nonatomic) YTQTMButton *sponsorBlockButton;
@@ -712,6 +717,7 @@ NSInteger pageStyle = 0;
     [self addSubview:self.sponsorBlockButton];
     if(!self.sponsorBlockButton || pageStyle != [%c(YTPageStyleController) pageStyle]) {
         self.sponsorBlockButton = [%c(YTQTMButton) iconButton];
+        sponsorBlockButton = self.sponsorBlockButton;
         self.sponsorBlockButton.frame = CGRectMake(0, 0, 40, 40);
         
         if([%c(YTPageStyleController) pageStyle]) { //dark mode
@@ -719,9 +725,10 @@ NSInteger pageStyle = 0;
         }
         else { //light mode
             UIImage *image = [UIImage imageWithContentsOfFile:SponsorblocksettingsPath];
-            //image = [image imageWithTintColor:UIColor.blackColor renderingMode:UIImageRenderingModeAlwaysTemplate];
             [self.sponsorBlockButton setImage:image forState:UIControlStateNormal];
             [self.sponsorBlockButton setTintColor:UIColor.blackColor];
+            self.sponsorBlockButton.imageView.image = [self.sponsorBlockButton.imageView.image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+            [self.sponsorBlockButton.imageView setTintColor:[UIColor blackColor]];
         }
         pageStyle = [%c(YTPageStyleController) pageStyle];
         
@@ -745,6 +752,17 @@ NSInteger pageStyle = 0;
 %new
 -(void)sponsorBlockButtonPressed:(UIButton *)sender {
     [[[UIApplication sharedApplication] delegate].window.rootViewController presentViewController:[[SponsorBlockSettingsController alloc] init] animated:YES completion:nil];
+}
+%end
+%hook YTQTMButton
+-(UIImageView *)imageView {
+    if(self == sponsorBlockButton) {
+        UIImageView *imageView = %orig;
+        imageView.image = [imageView.image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+        [imageView setTintColor:UIColor.blackColor];
+        return imageView;
+    }
+    return %orig;
 }
 %end
 %end
