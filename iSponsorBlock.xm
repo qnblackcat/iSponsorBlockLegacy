@@ -384,10 +384,14 @@ NSString *modifiedTimeString;
 -(void)setSkipSegments:(NSMutableArray <SponsorSegment *> *)arg1 {
     %orig;
     [self removeSponsorMarkers];
-    if ([kWhitelistedChannels containsObject:self.playerViewController.channelID]) {
+    if([kWhitelistedChannels containsObject:self.playerViewController.channelID]) {
         return;
     }
     self.sponsorMarkerViews = [NSMutableArray array];
+    UIView *scrubber = [self valueForKey:@"_scrubberCircle"];
+    UIView *referenceView = [[self valueForKey:@"_segmentViews"] firstObject];
+    if (referenceView == nil) return;
+    CGFloat originY = referenceView.frame.origin.y;
     for(SponsorSegment *segment in arg1) {
         CGFloat startTime = segment.startTime;
         CGFloat endTime = segment.endTime;
@@ -395,27 +399,22 @@ NSString *modifiedTimeString;
         CGFloat endX = (endTime * self.frame.size.width) / self.totalTime;
         CGFloat markerWidth;
         if (endX >= beginX) markerWidth = endX - beginX;
-            else markerWidth = 0;
-        
+        else markerWidth = 0;
+
         UIColor *color;
-        if ([segment.category isEqualToString:@"sponsor"]) color = colorWithHexString([kCategorySettings objectForKey:@"sponsorColor"]);
-        else if ([segment.category isEqualToString:@"intro"]) color = colorWithHexString([kCategorySettings objectForKey:@"introColor"]);
-        else if ([segment.category isEqualToString:@"outro"]) color = colorWithHexString([kCategorySettings objectForKey:@"outroColor"]);
-        else if ([segment.category isEqualToString:@"interaction"]) color = colorWithHexString([kCategorySettings objectForKey:@"interactionColor"]);
-        else if ([segment.category isEqualToString:@"selfpromo"]) color = colorWithHexString([kCategorySettings objectForKey:@"selfpromoColor"]);
-        else if ([segment.category isEqualToString:@"music_offtopic"]) color = colorWithHexString([kCategorySettings objectForKey:@"music_offtopicColor"]);
-        UIView *newMarkerView = [[UIView alloc] initWithFrame:CGRectZero];
-        newMarkerView.backgroundColor = color;
-        [self addSubview:newMarkerView];
-        newMarkerView.translatesAutoresizingMaskIntoConstraints = NO;
+        if([segment.category isEqualToString:@"sponsor"]) color = colorWithHexString([kCategorySettings objectForKey:@"sponsorColor"]);
+        else if([segment.category isEqualToString:@"intro"]) color = colorWithHexString([kCategorySettings objectForKey:@"introColor"]);
+        else if([segment.category isEqualToString:@"outro"]) color = colorWithHexString([kCategorySettings objectForKey:@"outroColor"]);
+        else if([segment.category isEqualToString:@"interaction"]) color = colorWithHexString([kCategorySettings objectForKey:@"interactionColor"]);
+        else if([segment.category isEqualToString:@"selfpromo"]) color = colorWithHexString([kCategorySettings objectForKey:@"selfpromoColor"]);
+        else if([segment.category isEqualToString:@"music_offtopic"]) color = colorWithHexString([kCategorySettings objectForKey:@"music_offtopicColor"]);
         if (isnan(markerWidth) || !isfinite(beginX)) {
             return;
         }
-        [newMarkerView.widthAnchor constraintEqualToConstant:markerWidth].active = YES;
-        [newMarkerView.heightAnchor constraintEqualToConstant:2].active = YES;
-        [newMarkerView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor constant:beginX].active = YES;
-        [newMarkerView.topAnchor constraintEqualToAnchor:self.topAnchor constant:[[self valueForKey:@"_segmentViews"][0] frame].origin.y].active = YES;
-
+        UIView *newMarkerView = [[UIView alloc] initWithFrame:CGRectMake(beginX, originY, endX - beginX, 2)];
+        newMarkerView.userInteractionEnabled = NO;
+        newMarkerView.backgroundColor = color;
+        [self insertSubview:newMarkerView belowSubview:scrubber];
         [self.sponsorMarkerViews addObject:newMarkerView];
     }
 }
@@ -799,16 +798,16 @@ static void loadPrefs() {
     kWhitelistedChannels = [settings objectForKey:@"whitelistedChannels"] ? [(NSArray *)[settings objectForKey:@"whitelistedChannels"] mutableCopy] : [NSMutableArray array];
     
     NSDictionary *newSettings = @{
-      @"enabled" : @(kIsEnabled),
-      @"userID" : kUserID,
-      @"categorySettings" : kCategorySettings,
-      @"minimumDuration" : @(kMinimumDuration),
-      @"showSkipNotice" : @(kShowSkipNotice),
-      @"showButtonsInPlayer" : @(kShowButtonsInPlayer),
-      @"showModifiedTime" : @(kShowModifiedTime),
-      @"enableSkipCountTracking" : @(kEnableSkipCountTracking),
-      @"skipNoticeDuration" : @(kSkipNoticeDuration),
-      @"whitelistedChannels" : kWhitelistedChannels
+        @"enabled" : @(kIsEnabled),
+        @"userID" : kUserID,
+        @"categorySettings" : kCategorySettings,
+        @"minimumDuration" : @(kMinimumDuration),
+        @"showSkipNotice" : @(kShowSkipNotice),
+        @"showButtonsInPlayer" : @(kShowButtonsInPlayer),
+        @"showModifiedTime" : @(kShowModifiedTime),
+        @"enableSkipCountTracking" : @(kEnableSkipCountTracking),
+        @"skipNoticeDuration" : @(kSkipNoticeDuration),
+        @"whitelistedChannels" : kWhitelistedChannels
     };
     if (![newSettings isEqualToDictionary:settings]) {
         [newSettings writeToURL:[NSURL fileURLWithPath:path isDirectory:NO] error:nil];
