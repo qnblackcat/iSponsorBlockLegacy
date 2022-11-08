@@ -103,7 +103,7 @@ NSString *modifiedTimeString;
         
         [playerBarView maybeCreateMarkerViewsISB];
         
-        for(UIView *markerView in playerBarView.subviews) {
+        for (UIView *markerView in playerBarView.subviews) {
             if (![playerBarView.sponsorMarkerViews containsObject:markerView] && playerBarView.skipSegments.count == 0) {
                 [playerBarView maybeCreateMarkerViewsISB];
                 return;
@@ -330,7 +330,7 @@ NSString *modifiedTimeString;
         return;
     }
     self.sponsorMarkerViews = [NSMutableArray array];
-    for(SponsorSegment *segment in arg1) {
+    for (SponsorSegment *segment in arg1) {
         CGFloat startTime = segment.startTime;
         CGFloat endTime = segment.endTime;
         CGFloat beginX = (startTime * self.frame.size.width) / self.totalTime;
@@ -365,7 +365,7 @@ NSString *modifiedTimeString;
 
 %new
 -(void)removeSponsorMarkers {
-    for(UIView *markerView in self.sponsorMarkerViews) {
+    for (UIView *markerView in self.sponsorMarkerViews) {
         [markerView removeFromSuperview];
     }
     self.sponsorMarkerViews = [NSMutableArray array];
@@ -384,7 +384,7 @@ NSString *modifiedTimeString;
 -(void)setSkipSegments:(NSMutableArray <SponsorSegment *> *)arg1 {
     %orig;
     [self removeSponsorMarkers];
-    if([kWhitelistedChannels containsObject:self.playerViewController.channelID]) {
+    if ([kWhitelistedChannels containsObject:self.playerViewController.channelID]) {
         return;
     }
     self.sponsorMarkerViews = [NSMutableArray array];
@@ -392,7 +392,7 @@ NSString *modifiedTimeString;
     UIView *referenceView = [[self valueForKey:@"_segmentViews"] firstObject];
     if (referenceView == nil) return;
     CGFloat originY = referenceView.frame.origin.y;
-    for(SponsorSegment *segment in arg1) {
+    for (SponsorSegment *segment in arg1) {
         CGFloat startTime = segment.startTime;
         CGFloat endTime = segment.endTime;
         CGFloat beginX = (startTime * self.frame.size.width) / self.totalTime;
@@ -402,12 +402,12 @@ NSString *modifiedTimeString;
         else markerWidth = 0;
 
         UIColor *color;
-        if([segment.category isEqualToString:@"sponsor"]) color = colorWithHexString([kCategorySettings objectForKey:@"sponsorColor"]);
-        else if([segment.category isEqualToString:@"intro"]) color = colorWithHexString([kCategorySettings objectForKey:@"introColor"]);
-        else if([segment.category isEqualToString:@"outro"]) color = colorWithHexString([kCategorySettings objectForKey:@"outroColor"]);
-        else if([segment.category isEqualToString:@"interaction"]) color = colorWithHexString([kCategorySettings objectForKey:@"interactionColor"]);
-        else if([segment.category isEqualToString:@"selfpromo"]) color = colorWithHexString([kCategorySettings objectForKey:@"selfpromoColor"]);
-        else if([segment.category isEqualToString:@"music_offtopic"]) color = colorWithHexString([kCategorySettings objectForKey:@"music_offtopicColor"]);
+        if ([segment.category isEqualToString:@"sponsor"]) color = colorWithHexString([kCategorySettings objectForKey:@"sponsorColor"]);
+        else if ([segment.category isEqualToString:@"intro"]) color = colorWithHexString([kCategorySettings objectForKey:@"introColor"]);
+        else if ([segment.category isEqualToString:@"outro"]) color = colorWithHexString([kCategorySettings objectForKey:@"outroColor"]);
+        else if ([segment.category isEqualToString:@"interaction"]) color = colorWithHexString([kCategorySettings objectForKey:@"interactionColor"]);
+        else if ([segment.category isEqualToString:@"selfpromo"]) color = colorWithHexString([kCategorySettings objectForKey:@"selfpromoColor"]);
+        else if ([segment.category isEqualToString:@"music_offtopic"]) color = colorWithHexString([kCategorySettings objectForKey:@"music_offtopicColor"]);
         if (isnan(markerWidth) || !isfinite(beginX)) {
             return;
         }
@@ -421,7 +421,7 @@ NSString *modifiedTimeString;
 
 %new
 -(void)removeSponsorMarkers {
-    for(UIView *markerView in self.sponsorMarkerViews) {
+    for (UIView *markerView in self.sponsorMarkerViews) {
         [markerView removeFromSuperview];
     }
     self.sponsorMarkerViews = [NSMutableArray array];
@@ -509,7 +509,7 @@ AVQueuePlayer *queuePlayer;
     NSString *path = [self.filePath.stringByDeletingLastPathComponent stringByAppendingPathComponent:[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"plist"]];
     [[NSFileManager defaultManager] createFileAtPath:path contents:nil attributes:nil];
     NSMutableArray *segments = [NSMutableArray array];
-    for(SponsorSegment *segment in skipSegments) {
+    for (SponsorSegment *segment in skipSegments) {
         [segments addObject:@{
             @"startTime" : @(segment.startTime),
             @"endTime" : @(segment.endTime),
@@ -580,7 +580,7 @@ AVQueuePlayer *queuePlayer;
 -(void)updateMarkerViews {
     if (self.skipSegments.count > 0) {
         CGFloat totalTime = [@([self items][self.currentPlayerItem].duration.value) floatValue] / [self items][self.currentPlayerItem].duration.timescale;
-        for(UIView *markerView in self.markerViews) {
+        for (UIView *markerView in self.markerViews) {
             AVScrubber *scrubber = self.playerViewController.contentView.playbackControlsView.scrubber;
             CGFloat startTime = self.skipSegments[[self.markerViews indexOfObject:markerView]].startTime;
             CGFloat endTime = self.skipSegments[[self.markerViews indexOfObject:markerView]].endTime;
@@ -599,11 +599,11 @@ AVQueuePlayer *queuePlayer;
     NSDictionary *segments = [segmentsDict objectForKey:@"skipSegments"];
     self.skipSegments = [NSMutableArray array];
     CGFloat totalTime = [@([self items][self.currentPlayerItem].duration.value) floatValue] / [self items][self.currentPlayerItem].duration.timescale;
-    for(UIView *markerView in self.markerViews) {
+    for (UIView *markerView in self.markerViews) {
         [markerView removeFromSuperview];
     }
     self.markerViews = [NSMutableArray array];
-    for(NSDictionary *dict in segments) {
+    for (NSDictionary *dict in segments) {
         SponsorSegment *segment = [[SponsorSegment alloc] initWithStartTime:[[dict objectForKey:@"startTime"] floatValue] endTime:[[dict objectForKey:@"endTime"] floatValue] category:[dict objectForKey:@"category"] UUID:[dict objectForKey:@"UUID"]];
         [self.skipSegments addObject:segment];
         AVScrubber *scrubber = self.playerViewController.contentView.playbackControlsView.scrubber;
@@ -832,7 +832,7 @@ static void prefsChanged(CFNotificationCenterRef center, void *observer, CFStrin
             %init(Cercube)
             NSString *downloadsDirectory = [documentsDirectory stringByAppendingPathComponent:@"Carida_Files"];
             NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:downloadsDirectory error:nil];
-            for(NSString *path in files) {
+            for (NSString *path in files) {
                 if ([path.pathExtension isEqualToString:@"plist"]) {
                     NSString *mp4Path = [downloadsDirectory stringByAppendingPathComponent:[[path stringByDeletingPathExtension] stringByAppendingPathExtension:@"mp4"]];
                     BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:mp4Path];
@@ -856,7 +856,7 @@ static void prefsChanged(CFNotificationCenterRef center, void *observer, CFStrin
         NSString *documentsDirectory = [paths objectAtIndex:0];
         NSString *downloadsDirectory = [documentsDirectory stringByAppendingPathComponent:@"Carida_Files"];
         NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:downloadsDirectory error:nil];
-        for(NSString *path in files) {
+        for (NSString *path in files) {
             if ([path.pathExtension isEqualToString:@"plist"]) {
                 NSString *mp4Path = [downloadsDirectory stringByAppendingPathComponent:[[path stringByDeletingPathExtension] stringByAppendingPathExtension:@"mp4"]];
                 BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:mp4Path];
