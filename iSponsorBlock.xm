@@ -221,57 +221,31 @@ NSString *modifiedTimeString;
 %property (strong, nonatomic) YTQTMButton *sponsorStartedEndedButton;
 %property (strong, nonatomic) YTPlayerViewController *playerViewController;
 %property (nonatomic, assign) BOOL isDisplayingSponsorBlockViewController;
--(NSArray *)topControls {
-    NSArray <UIView *> *topControls = %orig;
-    if (![topControls containsObject:self.sponsorBlockButton] && kShowButtonsInPlayer) {
-        NSMutableArray *mutableArray = topControls.mutableCopy;
-        if (!self.sponsorBlockButton) {
+-(NSMutableArray *)topControls {
+    NSMutableArray <UIView *> *topControls = %orig;
+    if(![topControls containsObject:self.sponsorBlockButton] && kShowButtonsInPlayer){
+        if(!self.sponsorBlockButton){
             self.sponsorBlockButton = [%c(YTQTMButton) iconButton];
             self.sponsorBlockButton.frame = CGRectMake(0, 0, 24, 36);
-            [self.sponsorBlockButton setImage:[UIImage imageWithContentsOfFile:PlayerInfoIconSponsorBlockerPath] forState:UIControlStateNormal];
-            
-            self.sponsorStartedEndedButton = [%c(YTQTMButton) iconButton];
-            self.sponsorStartedEndedButton.frame = CGRectMake(0,0,24,36);
-            if (self.playerViewController.userSkipSegments.lastObject.endTime != -1) [self.sponsorStartedEndedButton setImage:[UIImage imageWithContentsOfFile:SponsorblockstartPath] forState:UIControlStateNormal];
-            else [self.sponsorStartedEndedButton setImage:[UIImage imageWithContentsOfFile:SponsorblockendPath] forState:UIControlStateNormal];  
-            if (topControls[0].superview == self) {
-                [self addSubview:self.sponsorBlockButton];
-                [self addSubview:self.sponsorStartedEndedButton];
-            }
-            else {
-                UIView *containerView = [self valueForKey:@"_topControlsAccessibilityContainerView"];
-                [containerView addSubview:self.sponsorBlockButton];
-                [containerView addSubview:self.sponsorStartedEndedButton];
-            }
-
-            [self.sponsorBlockButton addTarget:self action:@selector(sponsorBlockButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
             [self.sponsorStartedEndedButton addTarget:self action:@selector(sponsorStartedEndedButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         }
-        
-        [mutableArray insertObject:self.sponsorBlockButton atIndex:0];
-        [mutableArray insertObject:self.sponsorStartedEndedButton atIndex:0];
-        return mutableArray.copy;
+
+        [topControls insertObject:self.sponsorBlockButton atIndex:0];
+        [topControls insertObject:self.sponsorStartedEndedButton atIndex:0];
+        return topControls;
     }
     return %orig;
 }
--(void)setTopOverlayVisible:(BOOL)arg1 isAutonavCanceledState:(BOOL)arg2 {
+-(void)setTopOverlayVisible:(BOOL)visible isAutonavCanceledState:(BOOL)canceledState {
     if (self.isDisplayingSponsorBlockViewController) {
-        %orig(NO, arg2);
+        %orig(NO, canceledState);
         self.sponsorBlockButton.imageView.hidden = YES;
         self.sponsorStartedEndedButton.imageView.hidden = YES;
         return;
     }
-    BOOL overlayVisible;
-    if ([self respondsToSelector:@selector(isOverlayVisible)]) {
-        overlayVisible = self.overlayVisible;
-    } else {
-        overlayVisible = [[self valueForKey:@"_isOverlayVisible"] boolValue];
-    }
-    self.sponsorBlockButton.hidden = !overlayVisible;
-    self.sponsorStartedEndedButton.hidden = !overlayVisible;
-    
-    self.sponsorBlockButton.imageView.hidden = !overlayVisible;
-    self.sponsorStartedEndedButton.imageView.hidden = !overlayVisible;
+
+    self.sponsorBlockButton.alpha = canceledState || !visible ? 0:1;
+    self.sponsorStartedEndedButton.alpha = canceledState || !visible ? 0:1;
     %orig;
 }
 
